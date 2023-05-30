@@ -1,9 +1,19 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 
 const Home = () => {
+  const [user, setUser] = useState(JSON.parse(localStorage.getItem("user")));
   const [phoneNumber, setPhoneNumber] = useState("");
   const [selectedPhoneNum, setSelectedPhoneNum] = useState("");
   const [chat, setChat] = useState([]);
+
+  // useEffect(() => {
+  //   console.log(localStorage.getItem("user"));
+  //   setUser(JSON.parse(localStorage.getItem("user")));
+
+  //   return () => {
+  //     localStorage.setItem("user", JSON.stringify(user));
+  //   };
+  // }, []);
 
   const handleInputChange = (event) => {
     setPhoneNumber(event.target.value.replace(/[^0-9]/g, ""));
@@ -16,22 +26,7 @@ const Home = () => {
     }
   };
 
-  const handleMessageSubmit = (event) => {
-    if (event.key === "Enter") {
-      if (event.target.value) {
-        const message = {
-          idMessage: Math.random() * 3000,
-          type: "outgoing",
-          textMessage: event.target.value,
-        };
-        setChat((prev) => [...prev, message]);
-      }
-    }
-  };
-
   const getChat = () => {
-    const user = JSON.parse(localStorage.getItem("user"));
-
     if (user[phoneNumber]) {
       const chatInfo = {
         chatId: `${phoneNumber}@c.us`,
@@ -53,8 +48,45 @@ const Home = () => {
           setChat(res.reverse());
         });
     } else {
-      user[phoneNumber] = 0;
-      localStorage.setItem("user", JSON.stringify(user));
+      const newUserData = { ...user, [phoneNumber]: 0 };
+      localStorage.setItem("user", JSON.stringify(newUserData));
+    }
+  };
+
+  const handleMessageSubmit = (event) => {
+    if (event.key === "Enter") {
+      if (event.target.value) {
+        const message = {
+          chatId: `${selectedPhoneNum}@c.us`,
+          message: event.target.value,
+        };
+
+        fetch(
+          `https://api.green-api.com/waInstance${user.idInstance}/sendMessage/${user.apiTokenInstance}`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(message),
+          }
+        )
+          .then((res) => res.json())
+          .then((res) => {
+            if (res.idMessage) {
+              res.textMessage = event.target.value;
+              res.type = "outgoing";
+
+              setUser((prev) => {
+                const newUserData = { ...prev, [selectedPhoneNum]: prev[selectedPhoneNum] + 1 };
+                localStorage.setItem("user", JSON.stringify(newUserData));
+                return newUserData;
+              });
+              setChat((prev) => [...prev, res]);
+            } else throw new Error("Unable to send message!");
+          })
+          .catch((err) => console.log(err.message || err));
+      }
     }
   };
 
@@ -90,7 +122,7 @@ const Home = () => {
               </p>
             ))
           ) : (
-            <p className="italic mt-36">No messages</p>
+            <p className="italic mt-4">No messages</p>
           )}
         </div>
         <div className="flex gap-4">
