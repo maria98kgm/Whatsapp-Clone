@@ -11,8 +11,30 @@ const SignIn = () => {
       `https://api.green-api.com/waInstance${idInstance.current.value}/getStateInstance/${apiTokenInstance.current.value}`
     )
       .then((res) => res.json())
-      .then((res) => {
+      .then(async (res) => {
         if (res.stateInstance === "authorized") {
+          const settings = {
+            webhookUrl: "",
+            outgoingWebhook: "yes",
+            stateWebhook: "yes",
+            incomingWebhook: "yes",
+          };
+          const settingsRes = await fetch(
+            `https://api.green-api.com/waInstance${idInstance.current.value}/setSettings/${apiTokenInstance.current.value}`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify(settings),
+            }
+          );
+
+          return settingsRes.json();
+        } else throw new Error("Unauthorized!");
+      })
+      .then((res) => {
+        if (res.saveSettings) {
           localStorage.setItem(
             "user",
             JSON.stringify({
@@ -21,7 +43,7 @@ const SignIn = () => {
             })
           );
           navigate("/home");
-        } else throw new Error("Unauthorized!");
+        } else throw new Error("Unable to save settings!");
       })
       .catch((err) => console.log(err.message || err));
   };
