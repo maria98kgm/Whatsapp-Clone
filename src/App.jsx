@@ -6,9 +6,9 @@ const App = () => {
   const user = localStorage.getItem("user");
 
   return (
-    <div>
+    <div className="w-full min-h-full">
       <div className="absolute w-full h-52 bg-teal-600 inset-0 z-0" />
-      <main className="relative bg-white p-16 py-12 z-10 rounded-sm">
+      <main className="relative z-10 h-full flex justify-center">
         <Routes>
           <Route path="/" element={<Navigate to={user ? "/home" : "/signin"} />} />
           <Route path="/signin" element={<SignIn />} />

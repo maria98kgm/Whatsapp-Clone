@@ -6,6 +6,9 @@ export default {
       backgroundColor: {
         "whatsapp-main": "#111b21",
       },
+      maxHeight: {
+        500: "500px",
+      },
     },
   },
   plugins: [],

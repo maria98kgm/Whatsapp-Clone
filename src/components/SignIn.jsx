@@ -49,16 +49,16 @@ const SignIn = () => {
   };
 
   return (
-    <div>
+    <div className="w-fit m-auto bg-white p-16 py-12 rounded-sm">
       <h2 className="text-4xl mb-8">Sign In</h2>
       <div className="flex flex-col gap-5">
         <label>
           <p className="text-left pb-2 text-lg pl-1">idInstance</p>
-          <input type="text" ref={idInstance} className="text-input" />
+          <input type="text" ref={idInstance} className="text-input w-72" />
         </label>
         <label>
           <p className="text-left pb-2 text-lg pl-1">apiTokenInstance</p>
-          <input type="text" ref={apiTokenInstance} className="text-input" />
+          <input type="text" ref={apiTokenInstance} className="text-input w-72" />
         </label>
         <button
           onClick={handleSignIn}
