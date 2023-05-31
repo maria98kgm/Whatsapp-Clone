@@ -47,7 +47,7 @@ const SignIn = () => {
   };
 
   return (
-    <div className="w-fit m-auto bg-white p-16 py-12 rounded-sm">
+    <div className="w-fit m-auto bg-white p-16 py-12 rounded-sm text-gray-600">
       <h2 className="text-4xl mb-8">Sign In</h2>
       <div className="flex flex-col gap-5">
         <label>
