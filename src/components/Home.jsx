@@ -142,16 +142,11 @@ const Home = () => {
           className="text-input w-full"
           placeholder="Enter phone number..."
         />
-        {/* <div>
-          <p>Contact 1</p>
-          <p>Contact 1</p>
-          <p>Contact 1</p>
-          <p>Contact 1</p>
-          <p>Contact 1</p>
-        </div> */}
       </div>
       <div className="px-8 w-full flex flex-col justify-between gap-4">
-        <p>{selectedPhoneNum || "No phone number selected"}</p>
+        <p className="mb-4 pb-2 border-b">
+          {<span className="font-bold">{selectedPhoneNum}</span> || "No phone number selected"}
+        </p>
         <div className="h-full max-h-500 flex flex-col px-4 overflow-auto gap-4">
           {chat.length ? (
             chat.map((message) => (
