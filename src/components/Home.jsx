@@ -6,14 +6,16 @@ const Home = () => {
   const [selectedPhoneNum, setSelectedPhoneNum] = useState("");
   const [chat, setChat] = useState([]);
 
-  // useEffect(() => {
-  //   console.log(localStorage.getItem("user"));
-  //   setUser(JSON.parse(localStorage.getItem("user")));
+  useEffect(() => {
+    let interval = "";
+    if (selectedPhoneNum) {
+      interval = setInterval(checkNotification, 10000);
+    }
 
-  //   return () => {
-  //     localStorage.setItem("user", JSON.stringify(user));
-  //   };
-  // }, []);
+    return () => {
+      clearInterval(interval);
+    };
+  }, [selectedPhoneNum]);
 
   const handleInputChange = (event) => {
     setPhoneNumber(event.target.value.replace(/[^0-9]/g, ""));
@@ -27,30 +29,35 @@ const Home = () => {
   };
 
   const getChat = () => {
-    if (user[phoneNumber]) {
-      const chatInfo = {
-        chatId: `${phoneNumber}@c.us`,
-        count: user[phoneNumber],
-      };
+    const date = user[phoneNumber] || Date.now();
 
-      fetch(
-        `https://api.green-api.com/waInstance${user.idInstance}/getChatHistory/${user.apiTokenInstance}`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(chatInfo),
-        }
-      )
-        .then((res) => res.json())
-        .then((res) => {
-          setChat(res.reverse());
-        });
-    } else {
-      const newUserData = { ...user, [phoneNumber]: 0 };
+    if (!user[phoneNumber]) {
+      const newUserData = { ...user, [phoneNumber]: date };
       localStorage.setItem("user", JSON.stringify(newUserData));
+      setUser(newUserData);
     }
+
+    const chatInfo = {
+      chatId: `${phoneNumber}@c.us`,
+    };
+
+    fetch(
+      `https://api.green-api.com/waInstance${user.idInstance}/getChatHistory/${user.apiTokenInstance}`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(chatInfo),
+      }
+    )
+      .then((res) => res.json())
+      .then((res) => {
+        const index = res.findIndex((item) => item.timestamp * 1000 < date);
+        const newChat = res.slice(0, index);
+        setChat(newChat.reverse());
+      })
+      .catch((err) => console.log(err));
   };
 
   const handleMessageSubmit = (event) => {
@@ -88,6 +95,40 @@ const Home = () => {
           .catch((err) => console.log(err.message || err));
       }
     }
+  };
+
+  const checkNotification = () => {
+    fetch(
+      `https://api.green-api.com/waInstance${user.idInstance}/receiveNotification/${user.apiTokenInstance}`
+    )
+      .then((res) => res.json())
+      .then((res) => {
+        if (!res) throw "";
+        if (res.receiptId && res.body.senderData.sender === `${selectedPhoneNum}@c.us`) {
+          if (res.body.messageData.textMessageData) {
+            const newMessage = {
+              idMessage: res.body.idMessage,
+              type: "incoming-message",
+              textMessage: res.body.messageData.textMessageData.textMessage,
+            };
+
+            const findMessage = chat.find((item) => item.idMessage === newMessage.idMessage);
+
+            if (!findMessage) setChat((prev) => [...prev, newMessage]);
+          }
+        }
+
+        return res.receiptId;
+      })
+      .then((notificationId) => {
+        fetch(
+          `https://api.green-api.com/waInstance${user.idInstance}/deleteNotification/${user.apiTokenInstance}/${notificationId}`,
+          {
+            method: "DELETE",
+          }
+        ).catch((err) => console.log(err));
+      })
+      .catch(() => null);
   };
 
   return (
@@ -132,7 +173,6 @@ const Home = () => {
             className="text-input w-full"
             placeholder="Enter text message..."
           />
-          {/* <button className="bg-whatsapp-main text-white px-4 py-2 w-fit rounded-sm">Send</button> */}
         </div>
       </div>
     </div>

@@ -15,8 +15,6 @@ const SignIn = () => {
         if (res.stateInstance === "authorized") {
           const settings = {
             webhookUrl: "",
-            outgoingWebhook: "yes",
-            stateWebhook: "yes",
             incomingWebhook: "yes",
           };
           const settingsRes = await fetch(
