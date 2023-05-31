@@ -12,7 +12,7 @@ const Home = () => {
       clearInterval(interval);
       (async function () {
         const receivedChat = await getChat();
-        interval = setInterval(() => checkNotification(receivedChat), 6000);
+        interval = setInterval(() => checkNotification(receivedChat), 7000);
       })();
     }
 
@@ -120,34 +120,38 @@ const Home = () => {
             if (!findMessage.length) {
               setChat((prev) => [...prev, newMessage]);
             }
-
-            fetch(
-              `https://api.green-api.com/waInstance${user.idInstance}/deleteNotification/${user.apiTokenInstance}/${res.receiptId}`,
-              {
-                method: "DELETE",
-              }
-            ).catch((err) => console.log(err));
           }
+
+          fetch(
+            `https://api.green-api.com/waInstance${user.idInstance}/deleteNotification/${user.apiTokenInstance}/${res.receiptId}`,
+            {
+              method: "DELETE",
+            }
+          ).catch((err) => console.log(err));
         }
       })
       .catch((err) => console.log(err));
   };
 
   return (
-    <div className="w-full h-full bg-white p-6 rounded-sm flex">
-      <div className="border-r pr-4 w-96">
+    <div className="w-full h-full bg-whatsapp-main p-6 rounded-sm flex">
+      <div className="border-r border-gray-700 pr-4 w-96">
         <input
           type="text"
           value={phoneNumber}
           onChange={handleInputChange}
           onKeyDown={handlePhoneSubmit}
-          className="text-input w-full"
+          className="text-input w-full bg-whatsapp-light"
           placeholder="Enter phone number..."
         />
       </div>
       <div className="px-8 w-full flex flex-col justify-between gap-4">
-        <p className="mb-4 pb-2 border-b">
-          {<span className="font-bold">{selectedPhoneNum}</span> || "No phone number selected"}
+        <p className="mb-4 pb-4 border-b border-gray-700 text-left">
+          {selectedPhoneNum ? (
+            <span className="font-bold">{selectedPhoneNum}</span>
+          ) : (
+            <span className="italic">No phone number selected</span>
+          )}
         </p>
         <div className="h-full max-h-500 flex flex-col px-4 overflow-auto gap-4">
           {chat.length ? (
@@ -167,7 +171,7 @@ const Home = () => {
           <input
             type="text"
             onKeyDown={handleMessageSubmit}
-            className="text-input w-full"
+            className="text-input w-full bg-whatsapp-light"
             placeholder="Enter text message..."
           />
         </div>
